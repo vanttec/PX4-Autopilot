@@ -66,6 +66,8 @@
 # include "aid_sources/aux_global_position/aux_global_position.hpp"
 #endif // CONFIG_EKF2_AUX_GLOBAL_POSITION
 
+#include "lat_lon_alt/lat_lon_alt.hpp"
+
 enum class Likelihood { LOW, MEDIUM, HIGH };
 class ExternalVisionVel;
 
@@ -468,6 +470,8 @@ private:
 	StateResetCounts _state_reset_count_prev{};
 
 	StateSample _state{};		///< state struct of the ekf running at the delayed time horizon
+
+	LatLonAlt _gpos{NAN, NAN, NAN};
 
 	bool _filter_initialised{false};	///< true when the EKF sttes and covariances been initialised
 

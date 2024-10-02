@@ -728,6 +728,12 @@ void Ekf::fuse(const VectorState &K, float innovation)
 	// pos
 	_state.pos = matrix::constrain(_state.pos - K.slice<State::pos.dof, 1>(State::pos.idx, 0) * innovation, -1.e6f, 1.e6f);
 
+	if (_pos_ref.isInitialized()) {
+		// Accumulate position in global coordinates
+		_gpos += _state.pos;
+		_state.pos.zero();
+	}
+
 	// gyro_bias
 	_state.gyro_bias = matrix::constrain(_state.gyro_bias - K.slice<State::gyro_bias.dof, 1>(State::gyro_bias.idx,
 					     0) * innovation,
