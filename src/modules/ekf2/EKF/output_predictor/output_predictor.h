@@ -37,6 +37,7 @@
 #include <matrix/math.hpp>
 
 #include "../RingBuffer.h"
+#include "../lat_lon_alt/lat_lon_alt.hpp"
 
 #include <lib/geo/geo.h>
 
@@ -106,8 +107,7 @@ public:
 	// get the derivative of the vertical position of the body frame origin in local NED earth frame
 	float getVerticalPositionDerivative() const { return _output_vert_new.vert_vel - _vel_imu_rel_body_ned(2); }
 
-	// get the position of the body frame origin in local earth frame
-	matrix::Vector3f getPosition() const
+	LatLonAlt getLatLonAlt() const
 	{
 		// rotate the position of the IMU relative to the boy origin into earth frame
 		const matrix::Vector3f pos_offset_earth{_R_to_earth_now * _imu_pos_body};
