@@ -105,7 +105,7 @@ public:
 
 	// get the estimated terrain vertical position relative to the NED origin
 	float getTerrainVertPos() const { return _state.terrain; };
-	float getHagl() const { return _state.terrain - _state.pos(2); }
+	float getHagl() const { return _state.terrain + _gpos.altitude(); }
 
 	// get the terrain variance
 	float getTerrainVariance() const { return P(State::terrain.idx, State::terrain.idx); }
@@ -219,15 +219,11 @@ public:
 	void resetAccelBias();
 	void resetAccelBiasCov();
 
-	// return true if the global position estimate is valid
-	// return true if the origin is set we are not doing unconstrained free inertial navigation
-	// and have not started using synthetic position observations to constrain drift
 	bool global_position_is_valid() const
 	{
 		return (_pos_ref.isInitialized() && local_position_is_valid());
 	}
 
-	// return true if the local position estimate is valid
 	bool local_position_is_valid() const
 	{
 		return !_horizontal_deadreckon_time_exceeded;

@@ -247,7 +247,7 @@ void Ekf::resetTerrainToFlow()
 	ECL_INFO("reset hagl to flow");
 
 	// TODO: use the flow data
-	const float new_terrain = fmaxf(0.0f, _state.pos(2));
+	const float new_terrain = fmaxf(0.0f, -_gpos.altitude());
 	const float delta_terrain = new_terrain - _state.terrain;
 	_state.terrain = new_terrain;
 	P.uncorrelateCovarianceSetVariance<State::terrain.dof>(State::terrain.idx, 100.f);

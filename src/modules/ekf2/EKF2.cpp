@@ -1172,10 +1172,12 @@ void EKF2::PublishGlobalPosition(const hrt_abstime &timestamp)
 		vehicle_global_position_s global_pos{};
 		global_pos.timestamp_sample = timestamp;
 
-		// Position of local NED origin in GPS / WGS84 frame
-		_ekf.global_origin().reproject(position(0), position(1), global_pos.lat, global_pos.lon);
+		// Position GPS / WGS84 frame
+		const LatLonAlt lla = _ekf.getLatLonAlt();
+		global_pos.lat = lla.latitude_deg();
+		global_pos.lon = lla.longitude_deg();
 
-		global_pos.alt = -position(2) + _ekf.getEkfGlobalOriginAltitude(); // Altitude AMSL in meters
+		global_pos.alt = lla.altitude();
 #if defined(CONFIG_EKF2_GNSS)
 		global_pos.alt_ellipsoid = altAmslToEllipsoid(global_pos.alt);
 #else

@@ -36,7 +36,7 @@
 void Ekf::updateVerticalPositionAidStatus(estimator_aid_source1d_s &aid_src, const uint64_t &time_us,
 		const float observation, const float observation_variance, const float innovation_gate) const
 {
-	float innovation = _state.pos(2) - observation;
+	float innovation = -_gpos.altitude() - observation;
 	float innovation_variance = getStateVariance<State::pos>()(2) + observation_variance;
 
 	updateAidSourceStatus(aid_src, time_us,
@@ -130,8 +130,8 @@ void Ekf::resetHorizontalPositionTo(const Vector2f &new_horz_pos, const Vector2f
 
 void Ekf::resetVerticalPositionTo(const float new_vert_pos, float new_vert_pos_var)
 {
-	const float old_vert_pos = _state.pos(2);
-	_state.pos(2) = new_vert_pos;
+	const float old_vert_pos = -_gpos.altitude();
+	_gpos.altitude() = -new_vert_pos;
 
 	if (PX4_ISFINITE(new_vert_pos_var)) {
 		// the state variance is the same as the observation

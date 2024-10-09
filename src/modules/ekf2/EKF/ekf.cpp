@@ -74,7 +74,7 @@ void Ekf::reset()
 	//
 #if defined(CONFIG_EKF2_TERRAIN)
 	// assume a ground clearance
-	_state.terrain = _state.pos(2) + _params.rng_gnd_clearance;
+	_state.terrain = -_gpos.altitude() + _params.rng_gnd_clearance;
 #endif // CONFIG_EKF2_TERRAIN
 
 #if defined(CONFIG_EKF2_RANGE_FINDER)
@@ -364,7 +364,7 @@ bool Ekf::resetGlobalPosToExternalObservation(const double latitude, const doubl
 
 			ECL_INFO("reset height to external observation");
 			resetVerticalPositionTo(vpos, obs_var);
-			_last_known_pos(2) = _state.pos(2);
+			_last_known_pos(2) = -_gpos.altitude();
 		}
 	}
 
@@ -427,7 +427,7 @@ void Ekf::print_status()
 
 	printf("Position (%d-%d): [%.3f, %.3f, %.3f] var: [%.1e, %.1e, %.1e]\n",
 	       State::pos.idx, State::pos.idx + State::pos.dof - 1,
-	       (double)_state.pos(0), (double)_state.pos(1), (double)_state.pos(2),
+	       (double)_state.pos(0), (double)_state.pos(1), (double) - _gpos.altitude(),
 	       (double)getStateVariance<State::pos>()(0), (double)getStateVariance<State::pos>()(1),
 	       (double)getStateVariance<State::pos>()(2)
 	      );

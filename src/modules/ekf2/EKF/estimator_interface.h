@@ -42,6 +42,7 @@
 #ifndef EKF_ESTIMATOR_INTERFACE_H
 #define EKF_ESTIMATOR_INTERFACE_H
 
+#include "lat_lon_alt/lat_lon_alt.hpp"
 #if defined(MODULE_NAME)
 #include <px4_platform_common/log.h>
 # define ECL_INFO PX4_DEBUG
@@ -242,6 +243,7 @@ public:
 	const Vector3f &getVelocityDerivative() const { return _output_predictor.getVelocityDerivative(); }
 	float getVerticalPositionDerivative() const { return _output_predictor.getVerticalPositionDerivative(); }
 	Vector3f getPosition() const { return _output_predictor.getPosition(); }
+	LatLonAlt getLatLonAlt() const { return _output_predictor.getLatLonAlt(); }
 	const Vector3f &getOutputTrackingError() const { return _output_predictor.getOutputTrackingError(); }
 
 #if defined(CONFIG_EKF2_MAGNETOMETER)

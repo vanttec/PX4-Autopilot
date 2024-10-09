@@ -145,14 +145,14 @@ bool Ekf::setAltOrigin(const float altitude, const float epv)
 
 	if (PX4_ISFINITE(gps_alt_ref_prev) && isLocalVerticalPositionValid()) {
 		// determine current z
-		const float z_prev = _state.pos(2);
+		const float z_prev = -_gpos.altitude();
 		const float current_alt = -z_prev + gps_alt_ref_prev;
 #if defined(CONFIG_EKF2_GNSS)
 		const float gps_hgt_bias = _gps_hgt_b_est.getBias();
 #endif // CONFIG_EKF2_GNSS
 		resetVerticalPositionTo(_gps_alt_ref - current_alt);
 		ECL_DEBUG("EKF global origin updated, resetting vertical position %.1fm -> %.1fm", (double)z_prev,
-			  (double)_state.pos(2));
+			  (double) - _gpos.altitude());
 #if defined(CONFIG_EKF2_GNSS)
 		// adjust existing GPS height bias
 		_gps_hgt_b_est.setBias(gps_hgt_bias);
@@ -182,6 +182,8 @@ bool Ekf::setLatLonOriginFromCurrentPos(const double latitude, const double long
 	}
 
 	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
+	_gpos.latitude_rad() = radians(latitude);
+	_gpos.longitude_rad() = radians(longitude);
 
 	// if we are already doing aiding, correct for the change in position since the EKF started navigating
 	if (local_position_is_valid()) {
@@ -204,7 +206,8 @@ bool Ekf::setAltOriginFromCurrentPos(const float altitude, const float epv)
 		return false;
 	}
 
-	_gps_alt_ref = altitude + _state.pos(2);
+	_gps_alt_ref = altitude - _gpos.altitude();
+	_gpos.altitude() = altitude;
 
 	if (PX4_ISFINITE(epv) && (epv >= 0.f)) {
 		_gpos_origin_epv = epv;
@@ -732,6 +735,11 @@ void Ekf::fuse(const VectorState &K, float innovation)
 		// Accumulate position in global coordinates
 		_gpos += _state.pos;
 		_state.pos.zero();
+
+	} else {
+		// Always use the altitude state for vertical position
+		_gpos.altitude() -= _state.pos(2);
+		_state.pos(2) = 0.f;
 	}
 
 	// gyro_bias

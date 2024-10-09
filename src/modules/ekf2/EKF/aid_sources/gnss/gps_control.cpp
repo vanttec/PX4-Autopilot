@@ -82,10 +82,7 @@ void Ekf::controlGpsFusion(const imuSample &imu_delayed)
 			}
 		}
 
-		if (_pos_ref.isInitialized()) {
-			updateGnssPos(gnss_sample, _aid_src_gnss_pos);
-		}
-
+		updateGnssPos(gnss_sample, _aid_src_gnss_pos);
 		updateGnssVel(imu_delayed, gnss_sample, _aid_src_gnss_vel);
 
 	} else if (_control_status.flags.gps) {
@@ -108,8 +105,7 @@ void Ekf::controlGpsFusion(const imuSample &imu_delayed)
 
 		const bool continuing_conditions_passing = (gnss_vel_enabled || gnss_pos_enabled)
 				&& _control_status.flags.tilt_align
-				&& _control_status.flags.yaw_align
-				&& _pos_ref.isInitialized();
+				&& _control_status.flags.yaw_align;
 		const bool starting_conditions_passing = continuing_conditions_passing && _gps_checks_passed;
 
 		if (_control_status.flags.gps) {
@@ -169,8 +165,12 @@ void Ekf::controlGpsFusion(const imuSample &imu_delayed)
 					}
 				}
 
-				if (gnss_pos_enabled) {
+				if (gnss_pos_enabled && _aid_src_gnss_pos.innovation_rejected) {
 					resetHorizontalPositionToGnss(_aid_src_gnss_pos);
+					//TODO: reset latlon
+
+				} else {
+					fuseHorizontalPosition(_aid_src_gnss_pos);
 				}
 
 				_control_status.flags.gps = true;
@@ -222,7 +222,8 @@ void Ekf::updateGnssPos(const gnssSample &gnss_sample, estimator_aid_source2d_s 
 	// correct position and height for offset relative to IMU
 	const Vector3f pos_offset_body = _params.gps_pos_body - _params.imu_pos_body;
 	const Vector3f pos_offset_earth = _R_to_earth * pos_offset_body;
-	const Vector2f position = _pos_ref.project(gnss_sample.lat, gnss_sample.lon) - pos_offset_earth.xy();
+	const Vector2f innovation = (_gpos - LatLonAlt(gnss_sample.lat, gnss_sample.lon,
+				     gnss_sample.alt)).xy() + pos_offset_earth.xy();
 
 	// relax the upper observation noise limit which prevents bad GPS perturbing the position estimate
 	float pos_noise = math::max(gnss_sample.hacc, _params.gps_pos_noise);
@@ -240,9 +241,9 @@ void Ekf::updateGnssPos(const gnssSample &gnss_sample, estimator_aid_source2d_s 
 
 	updateAidSourceStatus(aid_src,
 			      gnss_sample.time_us,                                    // sample timestamp
-			      position,                                               // observation
+			      Vector2f(gnss_sample.lat, gnss_sample.lon),             // observation <== warning float
 			      pos_obs_var,                                            // observation variance
-			      Vector2f(_state.pos) - position,                        // innovation
+			      innovation,                                             // innovation
 			      Vector2f(getStateVariance<State::pos>()) + pos_obs_var, // innovation variance
 			      math::max(_params.gps_pos_innov_gate, 1.f));            // innovation gate
 }

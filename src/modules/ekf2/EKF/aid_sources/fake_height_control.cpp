@@ -98,7 +98,7 @@ void Ekf::controlFakeHgtFusion()
 void Ekf::resetFakeHgtFusion()
 {
 	ECL_INFO("reset fake height fusion");
-	_last_known_pos(2) = _state.pos(2);
+	_last_known_pos(2) = -_gpos.altitude();
 
 	resetVerticalVelocityToZero();
 	resetHeightToLastKnown();

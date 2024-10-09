@@ -34,11 +34,12 @@
 #pragma once
 
 #include "mathlib/math/Limits.hpp"
+#include <matrix/math.hpp>
 
 class LatLonAlt
 {
 public:
-	LatLonAlt() = delete;
+	LatLonAlt() = default;
 	LatLonAlt(const double latitude_deg, const double longitude_deg,
 		  const float altitude_m) : _latitude(math::radians(latitude_deg)), _longitude(math::radians(longitude_deg)),
 		_altitude(altitude_m) {};
@@ -54,12 +55,29 @@ public:
 	double &longitude_rad() { return _longitude; }
 	float &altitude() {return _altitude; }
 
-	void operator+=(matrix::Vector3f &delta_pos)
+	void operator+=(const matrix::Vector3f &delta_pos)
 	{
 		matrix::Vector2d d_lat_lon_to_d_xy = deltaLatLonToDeltaXY(_latitude, _altitude);
 		_latitude = matrix::wrap_pi(_latitude + static_cast<double>(delta_pos(0)) / d_lat_lon_to_d_xy(0));
 		_longitude = matrix::wrap_pi(_longitude + static_cast<double>(delta_pos(1)) / d_lat_lon_to_d_xy(1));
 		_altitude -= delta_pos(2);
+	}
+
+	void operator+=(const matrix::Vector2f &delta_pos)
+	{
+		matrix::Vector2d d_lat_lon_to_d_xy = deltaLatLonToDeltaXY(_latitude, _altitude);
+		_latitude = matrix::wrap_pi(_latitude + static_cast<double>(delta_pos(0)) / d_lat_lon_to_d_xy(0));
+		_longitude = matrix::wrap_pi(_longitude + static_cast<double>(delta_pos(1)) / d_lat_lon_to_d_xy(1));
+	}
+
+	LatLonAlt operator+(const matrix::Vector3f &delta_pos) const
+	{
+		LatLonAlt lla_new{};
+		matrix::Vector2d d_lat_lon_to_d_xy = deltaLatLonToDeltaXY(_latitude, _altitude);
+		lla_new.latitude_rad() = matrix::wrap_pi(_latitude + static_cast<double>(delta_pos(0)) / d_lat_lon_to_d_xy(0));
+		lla_new.longitude_rad() = matrix::wrap_pi(_longitude + static_cast<double>(delta_pos(1)) / d_lat_lon_to_d_xy(1));
+		lla_new.altitude() = _altitude - delta_pos(2);
+		return lla_new;
 	}
 
 	matrix::Vector3f operator-(const LatLonAlt &lla) const
