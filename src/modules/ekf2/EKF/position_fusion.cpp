@@ -93,10 +93,13 @@ bool Ekf::fuseVerticalPosition(estimator_aid_source1d_s &aid_src)
 	return aid_src.fused;
 }
 
-void Ekf::resetHorizontalPositionTo(const Vector2f &new_horz_pos, const Vector2f &new_horz_pos_var)
+void Ekf::resetHorizontalPositionTo(const double new_latitude, const double new_longitude,
+				    const Vector2f &new_horz_pos_var)
 {
 	const Vector2f delta_horz_pos{new_horz_pos - Vector2f{_state.pos}};
-	_state.pos.xy() = new_horz_pos;
+	const LatLonAlt new_gpos(new_latitude, new_longitude, _gpos.altitude());
+	const Vector3f delta_horz_pos = new_gpos - _gpos;
+	_gpos = new_gpos;
 
 	if (PX4_ISFINITE(new_horz_pos_var(0))) {
 		P.uncorrelateCovarianceSetVariance<1>(State::pos.idx, math::max(sq(0.01f), new_horz_pos_var(0)));
@@ -106,7 +109,7 @@ void Ekf::resetHorizontalPositionTo(const Vector2f &new_horz_pos, const Vector2f
 		P.uncorrelateCovarianceSetVariance<1>(State::pos.idx + 1, math::max(sq(0.01f), new_horz_pos_var(1)));
 	}
 
-	_output_predictor.resetHorizontalPositionTo(delta_horz_pos);
+	_output_predictor.resetLatLonTo(new_latitude, new_longitude);
 
 	// record the state change
 	if (_state_reset_status.reset_count.posNE == _state_reset_count_prev.posNE) {
@@ -128,21 +131,21 @@ void Ekf::resetHorizontalPositionTo(const Vector2f &new_horz_pos, const Vector2f
 	_time_last_hor_pos_fuse = _time_delayed_us;
 }
 
-void Ekf::resetVerticalPositionTo(const float new_vert_pos, float new_vert_pos_var)
+void Ekf::resetAltitudeTo(const float new_altitude, float new_vert_pos_var)
 {
-	const float old_vert_pos = -_gpos.altitude();
-	_gpos.altitude() = -new_vert_pos;
+	const float old_altitude = _gpos.altitude();
+	_gpos.altitude() = new_altitude;
 
 	if (PX4_ISFINITE(new_vert_pos_var)) {
 		// the state variance is the same as the observation
 		P.uncorrelateCovarianceSetVariance<1>(State::pos.idx + 2, math::max(sq(0.01f), new_vert_pos_var));
 	}
 
-	const float delta_z = new_vert_pos - old_vert_pos;
+	const float delta_z = -(new_altitude - old_altitude);
 
 	// apply the change in height / height rate to our newest height / height rate estimate
 	// which have already been taken out from the output buffer
-	_output_predictor.resetVerticalPositionTo(new_vert_pos, delta_z);
+	_output_predictor.resetAltitudeTo(new_altitude, delta_z);
 
 	// record the state change
 	if (_state_reset_status.reset_count.posD == _state_reset_count_prev.posD) {

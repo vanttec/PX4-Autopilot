@@ -68,7 +68,7 @@ public:
 				   const matrix::Vector3f &delta_velocity, const float delta_velocity_dt);
 
 	void correctOutputStates(const uint64_t time_delayed_us,
-				 const matrix::Quatf &quat_state, const matrix::Vector3f &vel_state, const matrix::Vector3f &pos_state,
+				 const matrix::Quatf &quat_state, const matrix::Vector3f &vel_state, const LatLonAlt &gpos_state,
 				 const matrix::Vector3f &gyro_bias, const matrix::Vector3f &accel_bias);
 
 	void resetQuaternion(const matrix::Quatf &quat_change);
@@ -76,8 +76,8 @@ public:
 	void resetHorizontalVelocityTo(const matrix::Vector2f &delta_horz_vel);
 	void resetVerticalVelocityTo(float delta_vert_vel);
 
-	void resetHorizontalPositionTo(const matrix::Vector2f &delta_horz_pos);
-	void resetVerticalPositionTo(const float new_vert_pos, const float vert_pos_change);
+	void resetLatLonTo(const matrix::Vector2f &delta_horz_pos);
+	void resetAltitudeTo(const float new_vert_pos, const float vert_pos_change);
 
 	void print_status();
 
@@ -112,7 +112,7 @@ public:
 		// rotate the position of the IMU relative to the boy origin into earth frame
 		const matrix::Vector3f pos_offset_earth{_R_to_earth_now * _imu_pos_body};
 		// subtract from the EKF position (which is at the IMU) to get position at the body origin
-		return _output_new.pos - pos_offset_earth;
+		return _global_ref + (_output_new.pos - pos_offset_earth);
 	}
 
 	// return an array containing the output predictor angular, velocity and position tracking
@@ -158,6 +158,8 @@ private:
 		float    vert_vel_integ{0.f}; ///< Integral of vertical velocity (m)
 		float    dt{0.f};             ///< delta time (sec)
 	};
+
+	LatLonAlt _global_ref{};
 
 	RingBuffer<outputSample> _output_buffer{12};
 	RingBuffer<outputVert> _output_vert_buffer{12};

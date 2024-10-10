@@ -714,7 +714,7 @@ private:
 
 	bool isHeightResetRequired() const;
 
-	void resetVerticalPositionTo(float new_vert_pos, float new_vert_pos_var = NAN);
+	void resetAltitudeTo(float new_altitude, float new_vert_pos_var = NAN);
 
 	void resetVerticalVelocityToZero();
 

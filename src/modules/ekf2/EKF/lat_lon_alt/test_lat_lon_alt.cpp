@@ -64,6 +64,16 @@ TEST(TestLatLonAlt, set)
 	ASSERT_EQ(lla.altitude(), 420);
 }
 
+TEST(TestLatLonAlt, copy)
+{
+	LatLonAlt lla(-0.8, -0.1, 500);
+
+	LatLonAlt lla_copy = lla;
+	ASSERT_EQ(lla_copy.latitude_deg(), -0.8);
+	ASSERT_EQ(lla_copy.longitude_deg(), -0.1);
+	ASSERT_EQ(lla_copy.altitude(), 500);
+}
+
 TEST(TestLatLonAlt, addDeltaPos)
 {
 	MapProjection pos_ref(60.0, 5.0);

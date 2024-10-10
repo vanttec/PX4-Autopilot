@@ -131,7 +131,7 @@ void Ekf::controlBaroHeightFusion(const imuSample &imu_sample)
 					ECL_WARN("%s height fusion reset required, all height sources failing", HGT_SRC_NAME);
 
 					_information_events.flags.reset_hgt_to_baro = true;
-					resetVerticalPositionTo(-(_baro_lpf.getState() - bias_est.getBias()), measurement_var);
+					resetAltitudeTo(_baro_lpf.getState() - bias_est.getBias(), measurement_var);
 					bias_est.setBias(-_gpos.altitude() + _baro_lpf.getState());
 
 					// reset vertical velocity if no valid sources available
@@ -163,7 +163,7 @@ void Ekf::controlBaroHeightFusion(const imuSample &imu_sample)
 					_height_sensor_ref = HeightSensor::BARO;
 
 					_information_events.flags.reset_hgt_to_baro = true;
-					resetVerticalPositionTo(-(_baro_lpf.getState() - bias_est.getBias()), measurement_var);
+					resetAltitudeTo(_baro_lpf.getState() - bias_est.getBias(), measurement_var);
 					bias_est.setBias(-_gpos.altitude() + _baro_lpf.getState());
 
 				} else {

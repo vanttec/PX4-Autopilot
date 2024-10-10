@@ -55,6 +55,9 @@ public:
 	double &longitude_rad() { return _longitude; }
 	float &altitude() {return _altitude; }
 
+	void setLatitudeDeg(const double &latitude_deg) { _latitude = math::radians(latitude_deg); }
+	void setLongitudeDeg(const double &longitude_deg) { _longitude = math::radians(longitude_deg); }
+
 	void operator+=(const matrix::Vector3f &delta_pos)
 	{
 		matrix::Vector2d d_lat_lon_to_d_xy = deltaLatLonToDeltaXY(_latitude, _altitude);
@@ -120,7 +123,7 @@ private:
 		static constexpr double meridian_radius_of_curvature_numerator = equatorial_radius * (1.0 - pow(eccentricity, 2));
 	};
 
-	double _latitude{NAN};  ///< (rad)
-	double _longitude{NAN}; ///< (rad)
-	float _altitude{NAN};   ///< above ellipsoid (m)
+	double _latitude{0.f};  ///< (rad)
+	double _longitude{0.f}; ///< (rad)
+	float _altitude{0.f};   ///< above ellipsoid (m)
 };

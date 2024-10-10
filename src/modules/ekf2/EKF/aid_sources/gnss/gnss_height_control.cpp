@@ -105,7 +105,7 @@ void Ekf::controlGnssHeightFusion(const gnssSample &gps_sample)
 					ECL_WARN("%s height fusion reset required, all height sources failing", HGT_SRC_NAME);
 
 					_information_events.flags.reset_hgt_to_gps = true;
-					resetVerticalPositionTo(aid_src.observation, measurement_var);
+					resetAltitudeTo(measurement, measurement_var);
 					bias_est.setBias(-_gpos.altitude() + measurement);
 
 					aid_src.time_last_fuse = _time_delayed_us;
@@ -128,7 +128,7 @@ void Ekf::controlGnssHeightFusion(const gnssSample &gps_sample)
 					_height_sensor_ref = HeightSensor::GNSS;
 
 					_information_events.flags.reset_hgt_to_gps = true;
-					resetVerticalPositionTo(-measurement, measurement_var);
+					resetAltitudeTo(measurement, measurement_var);
 					_gpos_origin_epv = 0.f; // The uncertainty of the global origin is now contained in the local position uncertainty
 					bias_est.reset();
 

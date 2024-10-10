@@ -168,7 +168,7 @@ bool Ekf::update()
 		// control fusion of observation data
 		controlFusionModes(imu_sample_delayed);
 
-		_output_predictor.correctOutputStates(imu_sample_delayed.time_us, _state.quat_nominal, _state.vel, _state.pos,
+		_output_predictor.correctOutputStates(imu_sample_delayed.time_us, _state.quat_nominal, _state.vel, _gpos,
 						      _state.gyro_bias, _state.accel_bias);
 
 		return true;
@@ -359,12 +359,11 @@ bool Ekf::resetGlobalPosToExternalObservation(const double latitude, const doubl
 			setAltOriginFromCurrentPos(altitude_corrected, epv);
 
 		} else {
-			const float vpos = -(altitude_corrected - _gps_alt_ref);
 			const float obs_var = math::max(sq(epv), sq(0.01f));
 
 			ECL_INFO("reset height to external observation");
-			resetVerticalPositionTo(vpos, obs_var);
-			_last_known_pos(2) = -_gpos.altitude();
+			resetAltitudeTo(altitude_corrected, obs_var);
+			_last_known_gpos.altitude() = _gpos.altitude();
 		}
 	}
 

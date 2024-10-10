@@ -150,7 +150,7 @@ bool Ekf::setAltOrigin(const float altitude, const float epv)
 #if defined(CONFIG_EKF2_GNSS)
 		const float gps_hgt_bias = _gps_hgt_b_est.getBias();
 #endif // CONFIG_EKF2_GNSS
-		resetVerticalPositionTo(_gps_alt_ref - current_alt);
+		resetAltitudeTo(current_alt);
 		ECL_DEBUG("EKF global origin updated, resetting vertical position %.1fm -> %.1fm", (double)z_prev,
 			  (double) - _gpos.altitude());
 #if defined(CONFIG_EKF2_GNSS)
