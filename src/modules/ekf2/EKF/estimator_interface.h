@@ -247,8 +247,17 @@ public:
 		LatLonAlt lla = _output_predictor.getLatLonAlt();
 		float x;
 		float y;
-		_pos_ref.project(lla.latitude_deg(), lla.longitude_deg(), x, y);
-		const float z = -(lla.altitude() - _gps_alt_ref);
+
+		if (_pos_ref.isInitialized()) {
+			_pos_ref.project(lla.latitude_deg(), lla.longitude_deg(), x, y);
+
+		} else {
+			MapProjection zero_ref;
+			zero_ref.initReference(0.0, 0.0);
+			zero_ref.project(lla.latitude_deg(), lla.longitude_deg(), x, y);
+		}
+
+		const float z = -(lla.altitude() - getEkfGlobalOriginAltitude());
 
 		return Vector3f(x, y, z);
 	}

@@ -104,15 +104,15 @@ bool Ekf::setLatLonOrigin(const double latitude, const double longitude, const f
 		return false;
 	}
 
-	bool current_pos_available = false;
-	double current_lat = static_cast<double>(NAN);
-	double current_lon = static_cast<double>(NAN);
+	// bool current_pos_available = false;
+	// double current_lat = static_cast<double>(NAN);
+	// double current_lon = static_cast<double>(NAN);
 
 	// if we are already doing aiding, correct for the change in position since the EKF started navigating
-	if (_pos_ref.isInitialized() && local_position_is_valid()) {
-		_pos_ref.reproject(_state.pos(0), _state.pos(1), current_lat, current_lon);
-		current_pos_available = true;
-	}
+	// if (_pos_ref.isInitialized() && local_position_is_valid()) {
+	// 	_pos_ref.reproject(_state.pos(0), _state.pos(1), current_lat, current_lon);
+	// 	current_pos_available = true;
+	// }
 
 	// reinitialize map projection to latitude, longitude, altitude, and reset position
 	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
@@ -121,11 +121,11 @@ bool Ekf::setLatLonOrigin(const double latitude, const double longitude, const f
 		_gpos_origin_eph = eph;
 	}
 
-	if (current_pos_available) {
-		// reset horizontal position if we already have a global origin
-		Vector2f position = _pos_ref.project(current_lat, current_lon);
-		resetHorizontalPositionTo(position);
-	}
+	// if (current_pos_available) {
+	// 	// reset horizontal position if we already have a global origin
+	// 	Vector2f position = _pos_ref.project(current_lat, current_lon);
+	// 	resetHorizontalPositionTo(position);
+	// }
 
 	return true;
 }
@@ -182,8 +182,7 @@ bool Ekf::setLatLonOriginFromCurrentPos(const double latitude, const double long
 	}
 
 	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
-	_gpos.latitude_rad() = radians(latitude);
-	_gpos.longitude_rad() = radians(longitude);
+	resetHorizontalPositionTo(latitude, longitude);
 
 	// if we are already doing aiding, correct for the change in position since the EKF started navigating
 	if (local_position_is_valid()) {
@@ -206,8 +205,8 @@ bool Ekf::setAltOriginFromCurrentPos(const float altitude, const float epv)
 		return false;
 	}
 
-	_gps_alt_ref = altitude - _gpos.altitude();
-	_gpos.altitude() = altitude;
+	_gps_alt_ref = altitude;
+	resetAltitudeTo(altitude);
 
 	if (PX4_ISFINITE(epv) && (epv >= 0.f)) {
 		_gpos_origin_epv = epv;
@@ -731,16 +730,9 @@ void Ekf::fuse(const VectorState &K, float innovation)
 	// pos
 	_state.pos = matrix::constrain(_state.pos - K.slice<State::pos.dof, 1>(State::pos.idx, 0) * innovation, -1.e6f, 1.e6f);
 
-	if (_pos_ref.isInitialized()) {
-		// Accumulate position in global coordinates
-		_gpos += _state.pos;
-		_state.pos.zero();
-
-	} else {
-		// Always use the altitude state for vertical position
-		_gpos.altitude() -= _state.pos(2);
-		_state.pos(2) = 0.f;
-	}
+	// Accumulate position in global coordinates
+	_gpos += _state.pos;
+	_state.pos.zero();
 
 	// gyro_bias
 	_state.gyro_bias = matrix::constrain(_state.gyro_bias - K.slice<State::gyro_bias.dof, 1>(State::gyro_bias.idx,

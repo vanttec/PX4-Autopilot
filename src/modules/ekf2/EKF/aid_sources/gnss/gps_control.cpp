@@ -323,8 +323,7 @@ void Ekf::resetVelocityToGnss(estimator_aid_source3d_s &aid_src)
 void Ekf::resetHorizontalPositionToGnss(estimator_aid_source2d_s &aid_src)
 {
 	_information_events.flags.reset_pos_to_gps = true;
-	resetHorizontalPositionTo(Vector2f(aid_src.observation), Vector2f(aid_src.observation_variance));
-	_gpos_origin_eph = 0.f; // The uncertainty of the global origin is now contained in the local position uncertainty
+	resetHorizontalPositionTo(aid_src.observation[0], aid_src.observation[1], Vector2f(aid_src.observation_variance));//TODO: fix pos offset and double precision
 
 	resetAidSourceStatusZeroInnovation(aid_src);
 }

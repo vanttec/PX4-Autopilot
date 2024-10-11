@@ -53,7 +53,7 @@ public:
 
 	// modify output filter to match the the EKF state at the fusion time horizon
 	void alignOutputFilter(const matrix::Quatf &quat_state, const matrix::Vector3f &vel_state,
-			       const matrix::Vector3f &pos_state);
+			       const LatLonAlt &gpos_state);
 	/*
 	* Implement a strapdown INS algorithm using the latest IMU data at the current time horizon.
 	* Buffer the INS states and calculate the difference with the EKF states at the delayed fusion time horizon.
@@ -76,8 +76,8 @@ public:
 	void resetHorizontalVelocityTo(const matrix::Vector2f &delta_horz_vel);
 	void resetVerticalVelocityTo(float delta_vert_vel);
 
-	void resetLatLonTo(const matrix::Vector2f &delta_horz_pos);
-	void resetAltitudeTo(const float new_vert_pos, const float vert_pos_change);
+	void resetLatLonTo(const double &new_latitude, const double &new_longitude);
+	void resetAltitudeTo(float new_altitude, float vert_pos_change);
 
 	void print_status();
 
@@ -159,7 +159,7 @@ private:
 		float    dt{0.f};             ///< delta time (sec)
 	};
 
-	LatLonAlt _global_ref{};
+	LatLonAlt _global_ref{0.0, 0.0, 0.f};
 
 	RingBuffer<outputSample> _output_buffer{12};
 	RingBuffer<outputVert> _output_vert_buffer{12};

@@ -58,6 +58,13 @@ public:
 	void setLatitudeDeg(const double &latitude_deg) { _latitude = math::radians(latitude_deg); }
 	void setLongitudeDeg(const double &longitude_deg) { _longitude = math::radians(longitude_deg); }
 
+	void setLatLon(const LatLonAlt &lla) { _latitude = lla.latitude_rad(); _longitude = lla.longitude_rad(); }
+	void setLatLonDeg(const double latitude, const double longitude) { _latitude = math::radians(latitude); _longitude = math::radians(longitude); }
+
+	void setZero() { _latitude = 0.0; _longitude = 0.0; _altitude = 0.f; }
+
+	void print() { printf("latitude = %f (deg), longitude = %f (deg), altitude = %f (m)\n", _latitude, _longitude, (double)_altitude); }
+
 	void operator+=(const matrix::Vector3f &delta_pos)
 	{
 		matrix::Vector2d d_lat_lon_to_d_xy = deltaLatLonToDeltaXY(_latitude, _altitude);

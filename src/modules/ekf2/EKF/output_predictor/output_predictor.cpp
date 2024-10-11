@@ -165,7 +165,7 @@ void OutputPredictor::resetLatLonTo(const double &new_latitude, const double &ne
 	_global_ref.setLongitudeDeg(new_longitude);
 }
 
-void OutputPredictor::resetAltitudeTo(const float new_altitude)
+void OutputPredictor::resetAltitudeTo(const float new_altitude, const float vert_pos_change)
 {
 	_global_ref.altitude() = new_altitude;
 }
@@ -336,7 +336,7 @@ void OutputPredictor::correctOutputStates(const uint64_t time_delayed_us,
 	// as the reference changes, adjust the position correction to keep a constant global position
 	const Vector3f residual = pos_state - (output_delayed.pos + pos_correction);
 
-	applyCorrectionToOutputBuffer(vel_correction, pos_correction - residual);
+	applyCorrectionToOutputBuffer(vel_correction, pos_correction + residual);
 
 	_global_ref = gpos_state;
 }

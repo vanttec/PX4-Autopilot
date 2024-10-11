@@ -93,12 +93,11 @@ bool Ekf::fuseVerticalPosition(estimator_aid_source1d_s &aid_src)
 	return aid_src.fused;
 }
 
-void Ekf::resetHorizontalPositionTo(const double new_latitude, const double new_longitude,
+void Ekf::resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude,
 				    const Vector2f &new_horz_pos_var)
 {
-	const Vector2f delta_horz_pos{new_horz_pos - Vector2f{_state.pos}};
 	const LatLonAlt new_gpos(new_latitude, new_longitude, _gpos.altitude());
-	const Vector3f delta_horz_pos = new_gpos - _gpos;
+	const Vector2f delta_horz_pos = (new_gpos - _gpos).xy();
 	_gpos = new_gpos;
 
 	if (PX4_ISFINITE(new_horz_pos_var(0))) {
@@ -189,9 +188,9 @@ void Ekf::resetAltitudeTo(const float new_altitude, float new_vert_pos_var)
 
 void Ekf::resetHorizontalPositionToLastKnown()
 {
-	ECL_INFO("reset position to last known (%.3f, %.3f)", (double)_last_known_pos(0), (double)_last_known_pos(1));
+	ECL_INFO("reset position to last known (%.3f, %.3f)", (double)_last_known_gpos.latitude_deg(), (double)_last_known_gpos.longitude_deg());
 	_information_events.flags.reset_pos_to_last_known = true;
 
 	// Used when falling back to non-aiding mode of operation
-	resetHorizontalPositionTo(_last_known_pos.xy(), sq(_params.pos_noaid_noise));
+	resetHorizontalPositionTo(_last_known_gpos.latitude_deg(), _last_known_gpos.longitude_deg(), sq(_params.pos_noaid_noise));
 }

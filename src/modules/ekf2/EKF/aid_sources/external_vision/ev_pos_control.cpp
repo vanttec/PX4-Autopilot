@@ -220,7 +220,7 @@ void Ekf::startEvPosFusion(const Vector2f &measurement, const Vector2f &measurem
 		ECL_INFO("starting %s fusion, resetting state", EV_AID_SRC_NAME);
 		//_position_sensor_ref = PositionSensor::EV;
 		_information_events.flags.reset_pos_to_vision = true;
-		resetHorizontalPositionTo(measurement, measurement_var);
+		// resetHorizontalPositionTo(measurement, measurement_var);//TODO:
 		_ev_pos_b_est.reset();
 	}
 
@@ -241,7 +241,7 @@ void Ekf::updateEvPosFusion(const Vector2f &measurement, const Vector2f &measure
 			if (!_control_status.flags.gps) {
 				ECL_INFO("reset to %s", EV_AID_SRC_NAME);
 				_information_events.flags.reset_pos_to_vision = true;
-				resetHorizontalPositionTo(measurement, measurement_var);
+				// resetHorizontalPositionTo(measurement, measurement_var);//TODO:
 				_ev_pos_b_est.reset();
 
 			} else {
@@ -281,11 +281,12 @@ void Ekf::updateEvPosFusion(const Vector2f &measurement, const Vector2f &measure
 				_information_events.flags.reset_pos_to_vision = true;
 
 				if (_control_status.flags.gps) {
-					resetHorizontalPositionTo(measurement - _ev_pos_b_est.getBias(), measurement_var + _ev_pos_b_est.getBiasVar());
+					//TODO: add ev origin
+					// resetHorizontalPositionTo(measurement - _ev_pos_b_est.getBias(), measurement_var + _ev_pos_b_est.getBiasVar());
 					_ev_pos_b_est.setBias(-Vector2f(_state.pos.xy()) + measurement);
 
 				} else {
-					resetHorizontalPositionTo(measurement, measurement_var);
+					// resetHorizontalPositionTo(measurement, measurement_var);
 					_ev_pos_b_est.reset();
 				}
 			}

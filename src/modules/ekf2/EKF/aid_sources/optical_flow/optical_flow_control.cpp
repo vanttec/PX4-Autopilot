@@ -233,7 +233,9 @@ void Ekf::resetFlowFusion(const flowSample &flow_sample)
 	// reset position, estimate is relative to initial position in this mode, so we start with zero error
 	if (!_control_status.flags.in_air) {
 		ECL_INFO("reset position to zero");
-		resetHorizontalPositionTo(Vector2f(0.f, 0.f), 0.f);
+		//TODO: reset origin instead?
+		resetHorizontalPositionToLastKnown();
+		// resetHorizontalPositionTo(Vector2f(0.f, 0.f), 0.f);
 	}
 
 	resetAidSourceStatusZeroInnovation(_aid_src_optical_flow);

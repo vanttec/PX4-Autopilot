@@ -467,7 +467,7 @@ private:
 
 	StateSample _state{};		///< state struct of the ekf running at the delayed time horizon
 
-	LatLonAlt _gpos{NAN, NAN, NAN};
+	LatLonAlt _gpos{0.0, 0.0, 0.f};
 
 	bool _filter_initialised{false};	///< true when the EKF sttes and covariances been initialised
 
@@ -482,7 +482,7 @@ private:
 	uint64_t _time_last_heading_fuse{0};
 	uint64_t _time_last_terrain_fuse{0};
 
-	Vector3f _last_known_pos{};		///< last known local position vector (m)
+	LatLonAlt _last_known_gpos{};
 
 	Vector3f _earth_rate_NED{};	///< earth rotation vector (NED) in rad/s
 
@@ -707,8 +707,8 @@ private:
 
 	void resetHorizontalPositionToLastKnown();
 
-	void resetHorizontalPositionTo(const Vector2f &new_horz_pos, const Vector2f &new_horz_pos_var);
-	void resetHorizontalPositionTo(const Vector2f &new_horz_pos, const float pos_var = NAN) { resetHorizontalPositionTo(new_horz_pos, Vector2f(pos_var, pos_var)); }
+	void resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude, const Vector2f &new_horz_pos_var);
+	void resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude, const float pos_var = NAN) { resetHorizontalPositionTo(new_latitude, new_longitude, Vector2f(pos_var, pos_var)); }
 
 	void resetWindTo(const Vector2f &wind, const Vector2f &wind_var);
 
