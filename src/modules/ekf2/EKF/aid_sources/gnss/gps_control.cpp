@@ -165,9 +165,8 @@ void Ekf::controlGpsFusion(const imuSample &imu_delayed)
 					}
 				}
 
-				if (gnss_pos_enabled && _aid_src_gnss_pos.innovation_rejected) {
+				if (gnss_pos_enabled && (_aid_src_gnss_pos.innovation_rejected || !_pos_ref.isInitialized())) {
 					resetHorizontalPositionToGnss(_aid_src_gnss_pos);
-					//TODO: reset latlon
 
 				} else {
 					fuseHorizontalPosition(_aid_src_gnss_pos);
@@ -323,7 +322,9 @@ void Ekf::resetVelocityToGnss(estimator_aid_source3d_s &aid_src)
 void Ekf::resetHorizontalPositionToGnss(estimator_aid_source2d_s &aid_src)
 {
 	_information_events.flags.reset_pos_to_gps = true;
-	resetHorizontalPositionTo(aid_src.observation[0], aid_src.observation[1], Vector2f(aid_src.observation_variance));//TODO: fix pos offset and double precision
+	setLatLonOriginFromCurrentPos(aid_src.observation[0], aid_src.observation[1],
+				      sqrtf(aid_src.observation_variance[0] +
+					    aid_src.observation_variance[1]));//TODO: fix pos offset,  double precision and variance
 
 	resetAidSourceStatusZeroInnovation(aid_src);
 }

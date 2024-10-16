@@ -258,11 +258,10 @@ void Ekf::predictState(const imuSample &imu_delayed)
 	_state.vel(2) += CONSTANTS_ONE_G * imu_delayed.delta_vel_dt;
 
 	// predict position states via trapezoidal integration of velocity
-	_state.pos += (vel_last + _state.vel) * imu_delayed.delta_vel_dt * 0.5f;
+	_gpos += (vel_last + _state.vel) * imu_delayed.delta_vel_dt * 0.5f;
 
 	// constrain states
 	_state.vel = matrix::constrain(_state.vel, -_params.velocity_limit, _params.velocity_limit);
-	_state.pos = matrix::constrain(_state.pos, -1.e6f, 1.e6f);
 
 
 	// calculate a filtered horizontal acceleration with a 1 sec time constant

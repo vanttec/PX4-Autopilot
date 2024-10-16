@@ -128,7 +128,8 @@ void Ekf::controlGnssHeightFusion(const gnssSample &gps_sample)
 					_height_sensor_ref = HeightSensor::GNSS;
 
 					_information_events.flags.reset_hgt_to_gps = true;
-					resetAltitudeTo(measurement, measurement_var);
+
+					setAltOriginFromCurrentPos(measurement, sqrtf(measurement_var)); //TODO: convert to var param
 					_gpos_origin_epv = 0.f; // The uncertainty of the global origin is now contained in the local position uncertainty
 					bias_est.reset();
 

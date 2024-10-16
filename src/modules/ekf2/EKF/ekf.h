@@ -104,7 +104,7 @@ public:
 	bool isTerrainEstimateValid() const { return _terrain_valid; }
 
 	// get the estimated terrain vertical position relative to the NED origin
-	float getTerrainVertPos() const { return _state.terrain; };
+	float getTerrainVertPos() const { return _state.terrain + getEkfGlobalOriginAltitude(); };
 	float getHagl() const { return _state.terrain + _gpos.altitude(); }
 
 	// get the terrain variance
@@ -707,7 +707,8 @@ private:
 
 	void resetHorizontalPositionToLastKnown();
 
-	void resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude, const Vector2f &new_horz_pos_var);
+	void resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude,
+				       const Vector2f &new_horz_pos_var);
 	void resetHorizontalPositionTo(const double &new_latitude, const double &new_longitude, const float pos_var = NAN) { resetHorizontalPositionTo(new_latitude, new_longitude, Vector2f(pos_var, pos_var)); }
 
 	void resetWindTo(const Vector2f &wind, const Vector2f &wind_var);

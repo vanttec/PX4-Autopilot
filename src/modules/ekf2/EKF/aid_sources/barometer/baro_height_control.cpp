@@ -163,8 +163,7 @@ void Ekf::controlBaroHeightFusion(const imuSample &imu_sample)
 					_height_sensor_ref = HeightSensor::BARO;
 
 					_information_events.flags.reset_hgt_to_baro = true;
-					resetAltitudeTo(_baro_lpf.getState() - bias_est.getBias(), measurement_var);
-					bias_est.setBias(-_gpos.altitude() + _baro_lpf.getState());
+					setAltOriginFromCurrentPos(measurement, sqrtf(measurement_var)); //TODO: convert to var param
 
 				} else {
 					ECL_INFO("starting %s height fusion", HGT_SRC_NAME);

@@ -136,27 +136,25 @@ bool Ekf::setAltOrigin(const float altitude, const float epv)
 		return false;
 	}
 
-	const float gps_alt_ref_prev = _gps_alt_ref;
+	float local_alt_prev;
+
+	if (PX4_ISFINITE(_gps_alt_ref)) {
+		local_alt_prev = _gpos.altitude();
+
+	} else {
+		local_alt_prev = _gpos.altitude() - _gps_alt_ref;
+	}
+
 	_gps_alt_ref = altitude;
+	//TODO: lpos reset counter
 
 	if (PX4_ISFINITE(epv) && (epv >= 0.f)) {
 		_gpos_origin_epv = epv;
 	}
 
-	if (PX4_ISFINITE(gps_alt_ref_prev) && isLocalVerticalPositionValid()) {
-		// determine current z
-		const float z_prev = -_gpos.altitude();
-		const float current_alt = -z_prev + gps_alt_ref_prev;
-#if defined(CONFIG_EKF2_GNSS)
-		const float gps_hgt_bias = _gps_hgt_b_est.getBias();
-#endif // CONFIG_EKF2_GNSS
-		resetAltitudeTo(current_alt);
-		ECL_DEBUG("EKF global origin updated, resetting vertical position %.1fm -> %.1fm", (double)z_prev,
-			  (double) - _gpos.altitude());
-#if defined(CONFIG_EKF2_GNSS)
-		// adjust existing GPS height bias
-		_gps_hgt_b_est.setBias(gps_hgt_bias);
-#endif // CONFIG_EKF2_GNSS
+	if (PX4_ISFINITE(local_alt_prev)) {
+		ECL_INFO("EKF origin updated, local vertical position %.1fm -> %.1fm", (double) - local_alt_prev,
+			 (double) - (_gpos.altitude() - _gps_alt_ref));
 	}
 
 	return true;
@@ -181,18 +179,28 @@ bool Ekf::setLatLonOriginFromCurrentPos(const double latitude, const double long
 		return false;
 	}
 
-	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
-	resetHorizontalPositionTo(latitude, longitude);
+	if (!_pos_ref.isInitialized()) {
+		MapProjection zero_ref;
+		zero_ref.initReference(0.0, 0.0);
+		const Vector2f pos_prev = zero_ref.project(_gpos.latitude_deg(), _gpos.longitude_deg());
 
-	// if we are already doing aiding, correct for the change in position since the EKF started navigating
-	if (local_position_is_valid()) {
-		double est_lat;
-		double est_lon;
-		_pos_ref.reproject(-_state.pos(0), -_state.pos(1), est_lat, est_lon);
-		_pos_ref.initReference(est_lat, est_lon, _time_delayed_us);
+		_pos_ref.initReference(latitude, longitude, _time_delayed_us);
+
+		// if we are already doing aiding, correct for the change in position since the EKF started navigating
+		if (local_position_is_valid()) {
+			double est_lat;
+			double est_lon;
+			_pos_ref.reproject(-pos_prev(0), -pos_prev(1), est_lat, est_lon);
+			_pos_ref.initReference(est_lat, est_lon, _time_delayed_us);
+		}
+
+		ECL_INFO("Origin set to lat=%.6f, lon=%.6f",
+			 _pos_ref.getProjectionReferenceLat(), _pos_ref.getProjectionReferenceLon());
 	}
 
-	if (PX4_ISFINITE(eph) && (eph >= 0.f)) {
+	resetHorizontalPositionTo(latitude, longitude, sq(eph));
+
+	if (PX4_ISFINITE(eph) && (eph >= 0.f)) { //TODO: this should be gpos eph
 		_gpos_origin_eph = eph;
 	}
 
@@ -205,8 +213,20 @@ bool Ekf::setAltOriginFromCurrentPos(const float altitude, const float epv)
 		return false;
 	}
 
-	_gps_alt_ref = altitude;
-	resetAltitudeTo(altitude);
+	if (!PX4_ISFINITE(_gps_alt_ref)) {
+		const float local_alt_prev = _gpos.altitude();
+
+		if (local_position_is_valid()) {
+			_gps_alt_ref = altitude - local_alt_prev;
+
+		} else {
+			_gps_alt_ref = altitude;
+		}
+
+		ECL_INFO("Origin alt=%.3f", (double)_gps_alt_ref);
+	}
+
+	resetAltitudeTo(altitude, sq(epv));
 
 	if (PX4_ISFINITE(epv) && (epv >= 0.f)) {
 		_gpos_origin_epv = epv;
