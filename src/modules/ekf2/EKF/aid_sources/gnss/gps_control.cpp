@@ -245,6 +245,11 @@ void Ekf::updateGnssPos(const gnssSample &gnss_sample, estimator_aid_source2d_s 
 			      innovation,                                             // innovation
 			      Vector2f(getStateVariance<State::pos>()) + pos_obs_var, // innovation variance
 			      math::max(_params.gps_pos_innov_gate, 1.f));            // innovation gate
+
+	// Override float lat/lon to get double precision
+	// TODO: fix updateAidSourceStatus to accept double precision observations
+	aid_src.observation[0] = gnss_sample.lat;
+	aid_src.observation[1] = gnss_sample.lon;
 }
 
 void Ekf::controlGnssYawEstimator(estimator_aid_source3d_s &aid_src_vel)
