@@ -36,7 +36,7 @@
 #include <lib/mixer_module/mixer_module.hpp>
 
 #include <gz/transport.hh>
-#include <gz/msgs/msgs.hh>
+#include <gz/msgs.hh>
 
 #include <uORB/PublicationMulti.hpp>
 #include <uORB/topics/esc_status.h>
