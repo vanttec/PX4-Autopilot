@@ -62,3 +62,6 @@
 	path = src/modules/uxrce_dds_client/Micro-XRCE-DDS-Client
 	url = https://github.com/PX4/Micro-XRCE-DDS-Client.git
 	branch = px4
+[submodule "Tools/simulation/gz"]
+	path = Tools/simulation/gz
+	url = https://github.com/vanttec/PX4-gazebo-models.git
