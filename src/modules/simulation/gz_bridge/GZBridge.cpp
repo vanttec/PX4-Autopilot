@@ -116,7 +116,7 @@ int GZBridge::init()
 		bool result;
 		std::string create_service = "/world/" + _world_name + "/create";
 
-		if (_node.Request(create_service, req, 1000, rep, result)) {
+		if (_node.Request(create_service, req, 100000, rep, result)) {
 			if (!rep.data() || !result) {
 				PX4_ERR("EntityFactory service call failed");
 				return PX4_ERROR;
@@ -282,7 +282,7 @@ int GZBridge::task_spawn(int argc, char *argv[])
 
 #if defined(ENABLE_LOCKSTEP_SCHEDULER)
 			// lockstep scheduler wait for initial clock set before returning
-			int sleep_count_limit = 10000;
+			int sleep_count_limit = 1000000;
 
 			while ((instance->world_time_us() == 0) && sleep_count_limit > 0) {
 				// wait for first clock message
