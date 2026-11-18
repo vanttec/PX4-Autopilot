@@ -95,6 +95,10 @@ elif [ "$PX4_SIMULATOR" = "gz" ] || [ "$(param show -q SIM_GZ_EN)" = "1" ]; then
 		echo "INFO  [init] Standalone PX4 launch, waiting for Gazebo"
 	fi
 
+	if [ "${PX4_GZ_WORLD}" = "imav2026_indoor_arena" ] && [ "${PX4_SIM_MODEL}" = "gz_x500_mono_cam_double" ] && [ -z "${PX4_GZ_MODEL_POSE}" ]; then
+		PX4_GZ_MODEL_POSE="6,-2.2,0.5,0,0,0"
+	fi
+
 	# start gz_bridge
 	if [ -n "${PX4_SIM_MODEL#*gz_}" ] && [ -z "${PX4_GZ_MODEL_NAME}" ]; then
 		# model specified, gz_bridge will spawn model
