@@ -94,6 +94,7 @@ if(gz-transport_FOUND)
 		baylands
   		lawn
 		imav2026_indoor_arena
+		tmr26
 	)
 
 	# find corresponding airframes
